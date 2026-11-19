@@ -30,14 +30,13 @@ for res in r['results']:
 
 **Parallel (requires `PARALLEL_API_KEY`):**
 ```bash
-uvx --from parallel-web python -c "
-import os
+uvx --from 'parallel-web>=1.0.1' python -c "
 from parallel import Parallel
-r = Parallel(api_key=os.environ['PARALLEL_API_KEY']).search(
-    objective='your query here',
-    search_queries=['your query here'],
+r = Parallel().search(
+    objective='Find current, reliable information that answers: your question here',
+    search_queries=['main topic keywords', 'alternate topic keywords'],
 )
-for res in r.results:
+for res in r.results[:5]:
     print(res.url)
     for excerpt in res.excerpts:
         print(excerpt)
@@ -55,6 +54,13 @@ for r in data.get('results', [])[:5]:
     print(r.get('content',''))
     print()
 "
+```
+
+Check which opt-in providers are configured without exposing their values:
+```bash
+[ -n "${TAVILY_API_KEY:-}" ] && echo "Tavily set"
+[ -n "${PARALLEL_API_KEY:-}" ] && echo "Parallel set"
+[ -n "${SEARXNG_URL:-}" ] && echo "SearXNG set"
 ```
 
 Pick the first available: Tavily if `TAVILY_API_KEY` is set, Parallel if `PARALLEL_API_KEY` is set, SearXNG if `SEARXNG_URL` is set, otherwise DuckDuckGo.
@@ -83,6 +89,7 @@ echo "(Full content saved to $tmpfile)"
 ## Rules
 
 - Always quote search queries to avoid shell word-splitting.
+- Never use `env` or `printenv` to select a provider; use the safe checks above.
 - Respect robots.txt for scraping; do not hammer a host with repeated requests.
 - Never send authentication cookies or session tokens to external URLs.
 - If a page returns a login wall or CAPTCHA, report the URL and stop; do not attempt to bypass it.
