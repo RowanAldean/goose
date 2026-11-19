@@ -1,6 +1,6 @@
 ---
 name: web-search
-description: Search the web and extract page content using DuckDuckGo (no API key required), Tavily, or SearXNG. Use whenever the task needs current information, facts not in training data, or content from a specific URL.
+description: Search the web and extract page content using DuckDuckGo (no API key required), Tavily, Parallel, or SearXNG. Use whenever the task needs current information, facts not in training data, or content from a specific URL.
 ---
 
 ## Requirements
@@ -28,6 +28,23 @@ for res in r['results']:
 "
 ```
 
+**Parallel (requires `PARALLEL_API_KEY`):**
+```bash
+uvx --from parallel-web python -c "
+import os
+from parallel import Parallel
+r = Parallel(api_key=os.environ['PARALLEL_API_KEY']).search(
+    objective='your query here',
+    search_queries=['your query here'],
+)
+for res in r.results:
+    print(res.url)
+    for excerpt in res.excerpts:
+        print(excerpt)
+    print()
+"
+```
+
 **SearXNG (self-hosted, requires `SEARXNG_URL`):**
 ```bash
 curl -sG --data-urlencode "q=your query here" --data "format=json" "${SEARXNG_URL}/search" | python3 -c "
@@ -40,7 +57,7 @@ for r in data.get('results', [])[:5]:
 "
 ```
 
-Pick the first available: Tavily if `TAVILY_API_KEY` is set, SearXNG if `SEARXNG_URL` is set, otherwise DuckDuckGo.
+Pick the first available: Tavily if `TAVILY_API_KEY` is set, Parallel if `PARALLEL_API_KEY` is set, SearXNG if `SEARXNG_URL` is set, otherwise DuckDuckGo.
 
 ## Extract page content
 
